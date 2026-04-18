@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Almost</title>
+    <title>Fading</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Extra+Light:wght@200&family=Cinzel:wght@400&display=swap" rel="stylesheet">
     
     <style>
         * {
@@ -17,7 +17,7 @@
         body, html {
             width: 100%;
             height: 100%;
-            background-color: #030303;
+            background-color: #0a0a0a; /* Цвет глубокого пепла */
             overflow: hidden;
             font-family: 'Cinzel', serif;
             display: flex;
@@ -27,34 +27,28 @@
             user-select: none;
         }
 
-        /* Стартовый экран для активации звука */
+        /* Оверлей начала - тихий и пустой */
         #start-overlay {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: #030303;
-            color: rgba(255, 255, 255, 0.5);
+            background-color: #0a0a0a;
+            color: rgba(255, 255, 255, 0.2);
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 1.2rem;
-            letter-spacing: 5px;
+            font-size: 0.9rem;
+            letter-spacing: 8px;
             text-transform: uppercase;
             cursor: pointer;
             z-index: 100;
-            transition: opacity 1s ease-out;
-            animation: pulse-text 2s infinite alternate;
+            transition: opacity 2s ease-in-out;
         }
 
-        @keyframes pulse-text {
-            from { opacity: 0.3; }
-            to { opacity: 0.8; }
-        }
-
-        /* Эффект вспышки молнии */
-        #lightning {
+        /* Эффект "глюка" или затухания сознания */
+        #glitch-overlay {
             position: absolute;
             top: 0;
             left: 0;
@@ -64,10 +58,10 @@
             opacity: 0;
             pointer-events: none;
             z-index: 5;
-            transition: opacity 0.05s ease-out;
         }
 
-        .rain-container {
+        /* Контейнер для пепла */
+        .ash-container {
             position: absolute;
             top: 0;
             left: 0;
@@ -77,168 +71,156 @@
             z-index: 1;
         }
 
-        .drop {
+        .ash-particle {
             position: absolute;
-            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0.4));
-            width: 1px;
-            height: 100px;
-            top: -120px;
-            animation: fall linear infinite;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: drift linear infinite;
         }
 
-        @keyframes fall {
-            to { transform: translateY(120vh); }
+        @keyframes drift {
+            0% { transform: translateY(-10vh) translateX(0) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.3; }
+            90% { opacity: 0.1; }
+            100% { transform: translateY(110vh) translateX(50px) rotate(360deg); opacity: 0; }
         }
 
         .text-container {
             z-index: 10;
             text-align: center;
+            filter: blur(0.5px);
         }
 
-        .almost-text {
-            color: #ffffff;
-            font-size: clamp(4rem, 10vw, 8rem);
-            font-weight: 400;
-            letter-spacing: 20px;
+        .status-text {
+            color: #d1d1d1;
+            font-size: clamp(2rem, 8vw, 5rem);
+            font-weight: 200;
+            letter-spacing: 25px;
             text-transform: lowercase;
             margin: 0;
-            margin-right: -20px;
-            animation: breathe 4s ease-in-out infinite alternate;
+            opacity: 0.6;
+            animation: dissolve 8s ease-in-out infinite alternate;
         }
 
-        @keyframes breathe {
+        /* Анимация распада и исчезновения */
+        @keyframes dissolve {
             0% {
+                opacity: 0.1;
+                letter-spacing: 40px;
+                filter: blur(10px);
+                transform: scale(1.1);
+            }
+            50% {
                 opacity: 0.5;
-                text-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
-                transform: scale(0.98);
+                filter: blur(2px);
             }
             100% {
-                opacity: 1;
-                text-shadow: 0 0 20px rgba(255, 255, 255, 0.5),
-                             0 0 40px rgba(255, 255, 255, 0.3),
-                             0 0 80px rgba(255, 255, 255, 0.1);
-                transform: scale(1.02);
+                opacity: 0.2;
+                letter-spacing: 20px;
+                filter: blur(5px);
+                transform: scale(0.95);
             }
+        }
+
+        /* Тонкая виньетка для чувства клаустрофобии */
+        .vignette {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            box-shadow: inset 0 0 150px #000;
+            pointer-events: none;
+            z-index: 20;
         }
     </style>
 </head>
 <body>
 
-    <div id="start-overlay">Click to start</div>
-
-    <div id="lightning"></div>
-    <div class="rain-container" id="rain-container"></div>
+    <div id="start-overlay">let it go</div>
+    <div class="vignette"></div>
+    <div id="glitch-overlay"></div>
+    <div class="ash-container" id="ash-container"></div>
 
     <div class="text-container">
-        <h1 class="almost-text">almost</h1>
+        <h1 class="status-text" id="main-text">vanishing</h1>
     </div>
 
     <script>
-        // --- ЗАЩИТА ОТ КОПИРОВАНИЯ И DEVTOOLS ---
-        const warningMessage = "Don't try to do this.";
-
-        // Блокировка правого клика
-        document.addEventListener('contextmenu', function(e) {
-            e.preventDefault();
-            alert(warningMessage);
-        });
-
-        // Блокировка горячих клавиш
-        document.addEventListener('keydown', function(e) {
-            // F12
-            if (e.key === 'F12' || e.keyCode === 123) {
+        // Защита (оставлена без изменений)
+        const warningMessage = "...";
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.addEventListener('keydown', e => {
+            if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && ['I','J','C'].includes(e.key.toUpperCase())) || (e.ctrlKey && e.key.toLowerCase() === 'u')) {
                 e.preventDefault();
-                alert(warningMessage);
-                return false;
-            }
-            // Ctrl+Shift+I / Ctrl+Shift+J / Ctrl+Shift+C
-            if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j' || e.key === 'C' || e.key === 'c')) {
-                e.preventDefault();
-                alert(warningMessage);
-                return false;
-            }
-            // Ctrl+U (Просмотр кода)
-            if (e.ctrlKey && (e.key === 'U' || e.key === 'u')) {
-                e.preventDefault();
-                alert(warningMessage);
-                return false;
             }
         });
 
-        // --- АУДИО ---
-        const rainAudio = new Audio('https://actions.google.com/sounds/v1/weather/rain_heavy_loud.ogg');
-        rainAudio.loop = true;
-        rainAudio.volume = 0.4; // Шум дождя фоном
+        // Аудио: теперь это низкочастотный гул и белый шум (эмбиент)
+        const ambientAudio = new Audio('https://actions.google.com/sounds/v1/ambiences/wind_soft_howl.ogg');
+        ambientAudio.loop = true;
+        ambientAudio.volume = 0.3;
 
-        const thunderAudio = new Audio('https://actions.google.com/sounds/v1/weather/thunder_crack.ogg');
-        thunderAudio.volume = 0.9; // Гром громкий
+        const heartbreakSound = new Audio('https://actions.google.com/sounds/v1/foley/static_crackle.ogg');
+        heartbreakSound.volume = 0.2;
 
-        // --- ГЕНЕРАЦИЯ ДОЖДЯ ---
-        const rainContainer = document.getElementById('rain-container');
-        const dropCount = 200;
+        // Генерация пепла (вместо дождя)
+        const ashContainer = document.getElementById('ash-container');
+        const ashCount = 80;
 
-        for (let i = 0; i < dropCount; i++) {
-            const drop = document.createElement('div');
-            drop.classList.add('drop');
-
-            const xPosition = Math.random() * 100;
-            const delay = Math.random() * 2;
-            const duration = Math.random() * 0.4 + 0.3;
-            const opacity = Math.random() * 0.5 + 0.2;
-
-            drop.style.left = `${xPosition}vw`;
-            drop.style.animationDuration = `${duration}s`;
-            drop.style.animationDelay = `${delay}s`;
-            drop.style.opacity = opacity;
-
-            rainContainer.appendChild(drop);
-        }
-
-        // --- ГЕНЕРАЦИЯ ГРОЗЫ ---
-        const lightning = document.getElementById('lightning');
-
-        function triggerLightning() {
-            // Воспроизводим звук грома (сбрасываем время, если уже играл)
-            thunderAudio.currentTime = 0;
-            thunderAudio.play();
-
-            // Первая вспышка
-            lightning.style.opacity = Math.random() * 0.5 + 0.3;
+        for (let i = 0; i < ashCount; i++) {
+            const ash = document.createElement('div');
+            ash.classList.add('ash-particle');
             
-            setTimeout(() => {
-                lightning.style.opacity = 0;
-                
-                // Вероятность двойной вспышки
-                if (Math.random() > 0.4) {
-                    setTimeout(() => {
-                        lightning.style.opacity = Math.random() * 0.6 + 0.4;
-                        setTimeout(() => {
-                            lightning.style.opacity = 0;
-                        }, 50 + Math.random() * 100);
-                    }, 50 + Math.random() * 150);
-                }
-            }, 50 + Math.random() * 100);
+            const size = Math.random() * 3 + 1;
+            const xPosition = Math.random() * 100;
+            const delay = Math.random() * 10;
+            const duration = Math.random() * 10 + 5;
 
-            // Планируем следующую молнию (от 5 до 15 секунд)
-            const nextFlash = 5000 + Math.random() * 10000;
-            setTimeout(triggerLightning, nextFlash);
+            ash.style.width = `${size}px`;
+            ash.style.height = `${size}px`;
+            ash.style.left = `${xPosition}vw`;
+            ash.style.animationDuration = `${duration}s`;
+            ash.style.animationDelay = `-${delay}s`;
+
+            ashContainer.appendChild(ash);
         }
 
-        // --- ИНИЦИАЛИЗАЦИЯ ПО КЛИКУ ---
-        const startOverlay = document.getElementById('start-overlay');
-        
-        startOverlay.addEventListener('click', () => {
-            // Прячем оверлей
-            startOverlay.style.opacity = '0';
+        // Эффект "эмоционального провала" (вместо молнии)
+        const glitch = document.getElementById('glitch-overlay');
+        const words = ["vanishing", "numb", "cold", "empty", "forgotten", "almost"];
+        const mainText = document.getElementById('main-text');
+
+        function triggerFade() {
+            // Редкие вспышки "белого шума"
+            heartbreakSound.currentTime = 0;
+            heartbreakSound.play();
+
+            glitch.style.opacity = Math.random() * 0.15;
+            
+            // Смена слова на мгновение
+            const originalWord = mainText.innerText;
+            mainText.innerText = words[Math.floor(Math.random() * words.length)];
+            mainText.style.filter = "blur(5px)";
+
             setTimeout(() => {
-                startOverlay.style.display = 'none';
-            }, 1000);
+                glitch.style.opacity = 0;
+                mainText.innerText = originalWord;
+                mainText.style.filter = "blur(0.5px)";
+            }, 150);
 
-            // Включаем звук дождя
-            rainAudio.play();
+            const nextEvent = 3000 + Math.random() * 8000;
+            setTimeout(triggerFade, nextEvent);
+        }
 
-            // Запускаем первую молнию через случайное время до 4 секунд
-            setTimeout(triggerLightning, Math.random() * 4000);
+        // Инициализация
+        const startOverlay = document.getElementById('start-overlay');
+        startOverlay.addEventListener('click', () => {
+            startOverlay.style.opacity = '0';
+            setTimeout(() => startOverlay.style.display = 'none', 2000);
+            ambientAudio.play();
+            setTimeout(triggerFade, 2000);
         });
     </script>
 
