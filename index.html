@@ -17,7 +17,8 @@
         body, html {
             width: 100%;
             height: 100%;
-            background-color: #0a0a0a; /* Цвет глубокого пепла */
+            /* Основной фон темный, чтобы фото проявлялось из темноты */
+            background-color: #030303; 
             overflow: hidden;
             font-family: 'Cinzel', serif;
             display: flex;
@@ -25,6 +26,33 @@
             align-items: center;
             -webkit-user-select: none;
             user-select: none;
+        }
+
+        /* --- НОВЫЙ БЛОК: СЛОЙ ДЛЯ ФОНА --- */
+        #fading-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            
+            /* СЮДА ВСТАВИТЬ ССЫЛКУ НА ФОТО */
+            background-image: url('images/att.Rp2mD4EBxbFIX5UNvseNl0xEpxl2smge7ynCHyGBXaA.jpeg'); 
+            
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            
+            /* МИНИМАЛЬНАЯ ПРОЗРАЧНОСТЬ. Отрегулируйте от 0.0 до 1.0 */
+            opacity: 0.07; 
+            
+            /* Легкое размытие, чтобы фото меньше отвлекало (по желанию) */
+            filter: blur(2px) grayscale(100%); 
+            
+            /* Самый нижний слой */
+            z-index: 0; 
+            
+            pointer-events: none; /* Чтобы не мешало кликам */
         }
 
         /* Оверлей начала - тихий и пустой */
@@ -43,7 +71,8 @@
             letter-spacing: 8px;
             text-transform: uppercase;
             cursor: pointer;
-            z-index: 100;
+            /* Поверх фона, но под текстом */
+            z-index: 100; 
             transition: opacity 2s ease-in-out;
         }
 
@@ -87,7 +116,7 @@
         }
 
         .text-container {
-            z-index: 10;
+            z-index: 10; /* Текст поверх всего */
             text-align: center;
             filter: blur(0.5px);
         }
@@ -132,11 +161,14 @@
             height: 100%;
             box-shadow: inset 0 0 150px #000;
             pointer-events: none;
-            z-index: 20;
+            /* Виньетка поверх фона, чтобы затемнить углы фото */
+            z-index: 2; 
         }
     </style>
 </head>
 <body>
+
+    <div id="fading-background"></div>
 
     <div id="start-overlay">let it go</div>
     <div class="vignette"></div>
