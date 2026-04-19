@@ -17,7 +17,6 @@
         body, html {
             width: 100%;
             height: 100%;
-            /* Основной фон темный, чтобы фото проявлялось из темноты */
             background-color: #030303; 
             overflow: hidden;
             font-family: 'Cinzel', serif;
@@ -28,55 +27,23 @@
             user-select: none;
         }
 
-        /* --- НОВЫЙ БЛОК: СЛОЙ ДЛЯ ФОНА --- */
         #fading-background {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            
-            /* СЮДА ВСТАВИТЬ ССЫЛКУ НА ФОТО */
+            /* Замени ссылку ниже на свое фото */
             background-image: url('images/att.Rp2mD4EBxbFIX5UNvseNl0xEpxl2smge7ynCHyGBXaA.jpeg'); 
-            
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
-            
-            /* МИНИМАЛЬНАЯ ПРОЗРАЧНОСТЬ. Отрегулируйте от 0.0 до 1.0 */
             opacity: 0.07; 
-            
-            /* Легкое размытие, чтобы фото меньше отвлекало (по желанию) */
             filter: blur(2px) grayscale(100%); 
-            
-            /* Самый нижний слой */
             z-index: 0; 
-            
-            pointer-events: none; /* Чтобы не мешало кликам */
+            pointer-events: none;
         }
 
-        /* Оверлей начала - тихий и пустой */
-        #start-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #0a0a0a;
-            color: rgba(255, 255, 255, 0.2);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 0.9rem;
-            letter-spacing: 8px;
-            text-transform: uppercase;
-            cursor: pointer;
-            /* Поверх фона, но под текстом */
-            z-index: 100; 
-            transition: opacity 2s ease-in-out;
-        }
-
-        /* Эффект "глюка" или затухания сознания */
         #glitch-overlay {
             position: absolute;
             top: 0;
@@ -89,7 +56,6 @@
             z-index: 5;
         }
 
-        /* Контейнер для пепла */
         .ash-container {
             position: absolute;
             top: 0;
@@ -116,7 +82,7 @@
         }
 
         .text-container {
-            z-index: 10; /* Текст поверх всего */
+            z-index: 10;
             text-align: center;
             filter: blur(0.5px);
         }
@@ -132,7 +98,6 @@
             animation: dissolve 8s ease-in-out infinite alternate;
         }
 
-        /* Анимация распада и исчезновения */
         @keyframes dissolve {
             0% {
                 opacity: 0.1;
@@ -152,7 +117,6 @@
             }
         }
 
-        /* Тонкая виньетка для чувства клаустрофобии */
         .vignette {
             position: fixed;
             top: 0;
@@ -161,7 +125,6 @@
             height: 100%;
             box-shadow: inset 0 0 150px #000;
             pointer-events: none;
-            /* Виньетка поверх фона, чтобы затемнить углы фото */
             z-index: 2; 
         }
     </style>
@@ -169,8 +132,6 @@
 <body>
 
     <div id="fading-background"></div>
-
-    <div id="start-overlay">let it go</div>
     <div class="vignette"></div>
     <div id="glitch-overlay"></div>
     <div class="ash-container" id="ash-container"></div>
@@ -180,8 +141,7 @@
     </div>
 
     <script>
-        // Защита (оставлена без изменений)
-        const warningMessage = "...";
+        // Защита
         document.addEventListener('contextmenu', e => e.preventDefault());
         document.addEventListener('keydown', e => {
             if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && ['I','J','C'].includes(e.key.toUpperCase())) || (e.ctrlKey && e.key.toLowerCase() === 'u')) {
@@ -189,7 +149,6 @@
             }
         });
 
-        // Аудио: теперь это низкочастотный гул и белый шум (эмбиент)
         const ambientAudio = new Audio('https://actions.google.com/sounds/v1/ambiences/wind_soft_howl.ogg');
         ambientAudio.loop = true;
         ambientAudio.volume = 0.3;
@@ -197,41 +156,52 @@
         const heartbreakSound = new Audio('https://actions.google.com/sounds/v1/foley/static_crackle.ogg');
         heartbreakSound.volume = 0.2;
 
-        // Генерация пепла (вместо дождя)
+        // Попытка автовоспроизведения (сработает, если браузер позволит)
+        // Если нет — звук включится после первого клика по странице
+        const startAudio = () => {
+            ambientAudio.play().catch(() => {
+                console.log("Audio waiting for user interaction...");
+            });
+            document.removeEventListener('click', startAudio);
+        };
+        document.addEventListener('click', startAudio);
+        
+        // Запуск логики сразу
+        window.onload = () => {
+            triggerFade();
+            startAudio(); 
+        };
+
+        // Пепел
         const ashContainer = document.getElementById('ash-container');
         const ashCount = 80;
 
         for (let i = 0; i < ashCount; i++) {
             const ash = document.createElement('div');
             ash.classList.add('ash-particle');
-            
             const size = Math.random() * 3 + 1;
             const xPosition = Math.random() * 100;
             const delay = Math.random() * 10;
             const duration = Math.random() * 10 + 5;
-
             ash.style.width = `${size}px`;
             ash.style.height = `${size}px`;
             ash.style.left = `${xPosition}vw`;
             ash.style.animationDuration = `${duration}s`;
             ash.style.animationDelay = `-${delay}s`;
-
             ashContainer.appendChild(ash);
         }
 
-        // Эффект "эмоционального провала" (вместо молнии)
+        // Глюки и смена слов
         const glitch = document.getElementById('glitch-overlay');
         const words = ["vanishing", "numb", "cold", "empty", "forgotten", "almost"];
         const mainText = document.getElementById('main-text');
 
         function triggerFade() {
-            // Редкие вспышки "белого шума"
             heartbreakSound.currentTime = 0;
-            heartbreakSound.play();
+            // Звук треска тоже может блокироваться до клика
+            heartbreakSound.play().catch(()=>{});
 
             glitch.style.opacity = Math.random() * 0.15;
-            
-            // Смена слова на мгновение
             const originalWord = mainText.innerText;
             mainText.innerText = words[Math.floor(Math.random() * words.length)];
             mainText.style.filter = "blur(5px)";
@@ -242,19 +212,8 @@
                 mainText.style.filter = "blur(0.5px)";
             }, 150);
 
-            const nextEvent = 3000 + Math.random() * 8000;
-            setTimeout(triggerFade, nextEvent);
+            setTimeout(triggerFade, 3000 + Math.random() * 8000);
         }
-
-        // Инициализация
-        const startOverlay = document.getElementById('start-overlay');
-        startOverlay.addEventListener('click', () => {
-            startOverlay.style.opacity = '0';
-            setTimeout(() => startOverlay.style.display = 'none', 2000);
-            ambientAudio.play();
-            setTimeout(triggerFade, 2000);
-        });
     </script>
-
 </body>
 </html>
